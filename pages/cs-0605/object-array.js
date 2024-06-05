@@ -102,7 +102,6 @@ export default function ObjectArray() {
           const ids = data.map((v) => v.id)
           // 如果data陣列中無資料，則從1開始編號起
           const newId = data.length > 0 ? Math.max(...ids) + 1 : 1
-
           // 先寫出要新增的物件值
           const newObj = { id: newId, text: 'xxx' }
           //1 //2
@@ -116,7 +115,11 @@ export default function ObjectArray() {
       <br />
       <button
         onClick={() => {
-          //const
+          const ids = data.map((v) => v.id)
+          const newId = data.length > 0 ? Math.max(...ids) + 1 : 1
+          const newObj = { id: newId, text: 'yyy' }
+          const nextData = [...data, newObj]
+          setData(nextData)
         }}
       >
         4. 列表最後面，新增一個文字為yyy的物件(id不能與其它資料重覆)
