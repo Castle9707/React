@@ -29,7 +29,7 @@ export default function ProductList() {
   }
 
   return (
-    <Layout1 title="商品列表">
+    <Layout1 title="商品列表" pageName="product-list">
       <Head>
         <meta keyword="小新" />
       </Head>

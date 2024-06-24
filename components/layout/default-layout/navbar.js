@@ -1,7 +1,14 @@
 import React from 'react'
 import Link from 'next/link'
 
-export default function Navbar() {
+const myStyle = {
+  borderRadius: '6px',
+  backgroundColor: 'blue',
+  color: 'white',
+  fontWeight: '900',
+}
+
+export default function Navbar({ pageName = '' }) {
   return (
     <div className="container">
       <nav className="navbar navbar-expand-lg bg-body-tertiary">
@@ -23,12 +30,20 @@ export default function Navbar() {
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               <li className="nav-item">
-                <Link className="nav-link" href="/ab-list">
+                <Link
+                  className="nav-link"
+                  style={pageName === 'ab-list' ? myStyle : null}
+                  href="/ab-list"
+                >
                   通訊錄列表
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" href="/sh-0619/product-list">
+                <Link
+                  className="nav-link"
+                  style={pageName === 'product-list' ? myStyle : null}
+                  href="/sh-0619/product-list"
+                >
                   商品列表
                 </Link>
               </li>

@@ -3,13 +3,13 @@ import Head from 'next/head'
 import Navbar from './navbar'
 import Footer from './footer'
 
-export default function Layout1({ title = '小新小站', children }) {
+export default function Layout1({ children, title = '', pageName = '' }) {
   return (
     <>
       <Head>
-        <title>{title}</title>
+        <title>{title ? '| 小心小站' : '小心小站'}</title>
       </Head>
-      <Navbar />
+      <Navbar {...{ pageName }} />
       <div className="container">{children}</div>
       <Footer />
     </>

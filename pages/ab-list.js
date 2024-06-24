@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react'
+import { AB_LIST } from '@/configs/api-path'
+import Layout1 from '@/components/layout/default-layout/layout1'
+import Link from 'next/link'
 
 export default function AbList() {
   const [data, setData] = useState({
@@ -7,7 +10,7 @@ export default function AbList() {
   })
 
   useEffect(() => {
-    fetch('http://192.168.36.200:3001/address-book/api')
+    fetch(`${AB_LIST}?page=5`)
       .then((r) => r.json())
       .then((myData) => {
         console.log(data)
@@ -16,35 +19,54 @@ export default function AbList() {
   }, [])
 
   return (
-    <>
-      <div className="container">
-        <div className="row">
-          <div className="col">
-            <table className="table table-bordered table-striped">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>姓名</th>
-                  <th>電郵</th>
-                  <th>手機</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.rows.map((r, i) => {
+    <Layout1 title="通訊錄列表" pageName="ab-list">
+      <div className="row">
+        <div className="col">
+          <nav aria-label="Page navigation example">
+            <ul className="pagination">
+              {Array(11)
+                .fill(1)
+                .map((v, i) => {
+                  const p = data.page - 5 + i
+                  if (p < 1 || p > data.totalPages) return null
                   return (
-                    <tr key={r.sid}>
-                      <td>{r.sid}</td>
-                      <td>{r.name}</td>
-                      <td>{r.email}</td>
-                      <td>{r.mobile}</td>
-                    </tr>
+                    <li className="page-item" key={i}>
+                      <Link className="page-link" href={`?page=${p}`}>
+                        {p}
+                      </Link>
+                    </li>
                   )
                 })}
-              </tbody>
-            </table>
-          </div>
+            </ul>
+          </nav>
         </div>
       </div>
-    </>
+      <div className="row">
+        <div className="col">
+          <table className="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>姓名</th>
+                <th>電郵</th>
+                <th>手機</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.rows.map((r, i) => {
+                return (
+                  <tr key={r.sid}>
+                    <td>{r.sid}</td>
+                    <td>{r.name}</td>
+                    <td>{r.email}</td>
+                    <td>{r.mobile}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </Layout1>
   )
 }
