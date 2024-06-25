@@ -2,21 +2,41 @@ import { useEffect, useState } from 'react'
 import { AB_LIST } from '@/configs/api-path'
 import Layout1 from '@/components/layout/default-layout/layout1'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 export default function AbList() {
+  const router = useRouter()
+  // const [loading, setLoading] = useState(false);
+  // const [loadingError, setLoadingError] = useState('');
   const [data, setData] = useState({
     success: false,
     rows: [],
   })
 
   useEffect(() => {
-    fetch(`${AB_LIST}?page=5`)
+    const controller = new AbortController()
+    const signal = controller.signal
+    // setLoading(true);
+    fetch(`${AB_LIST}?${new URLSearchParams(router.query)}`, { signal })
       .then((r) => r.json())
       .then((myData) => {
         console.log(data)
         setData(myData)
+        // setLoading(false);
       })
-  }, [])
+      .catch((ex) => {
+        // setLoadingError('載入資料時發生錯誤');
+        // setLoading(false);
+        console.log('fetch-ex', ex)
+      })
+    return () => {
+      controller.abort() // 取消上一次的 ajax
+    }
+  }, [router])
+
+  console.log(`ab-list render--------`)
+
+  if (!router.isReady || !data.success) return null
 
   return (
     <Layout1 title="通訊錄列表" pageName="ab-list">
@@ -28,9 +48,15 @@ export default function AbList() {
                 .fill(1)
                 .map((v, i) => {
                   const p = data.page - 5 + i
+                  if (isNaN(p)) return null
                   if (p < 1 || p > data.totalPages) return null
                   return (
-                    <li className="page-item" key={i}>
+                    <li
+                      className={
+                        data.page === p ? `page-item active` : `page-item`
+                      }
+                      key={p}
+                    >
                       <Link className="page-link" href={`?page=${p}`}>
                         {p}
                       </Link>

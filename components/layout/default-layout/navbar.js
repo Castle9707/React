@@ -41,6 +41,15 @@ export default function Navbar({ pageName = '' }) {
               <li className="nav-item">
                 <Link
                   className="nav-link"
+                  style={pageName === 'ab-add' ? myStyle : null}
+                  href="/ab-add"
+                >
+                  新增通訊錄
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link
+                  className="nav-link"
                   style={pageName === 'product-list' ? myStyle : null}
                   href="/sh-0619/product-list"
                 >
@@ -49,7 +58,7 @@ export default function Navbar({ pageName = '' }) {
               </li>
               <li className="nav-item">
                 <Link className="nav-link" href="/sh-0619/cart">
-                  購物車 <span class="badge text-bg-success">3</span>
+                  購物車 <span className="badge text-bg-success">3</span>
                 </Link>
               </li>
             </ul>
