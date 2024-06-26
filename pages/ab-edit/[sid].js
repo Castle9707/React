@@ -4,19 +4,19 @@ import Layout1 from '@/components/layout/default-layout/layout1'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { z } from 'zod'
-import { AB_ADD_POST } from '@/configs/api-path'
+import { AB_GET_ITEM, AB_UPDATE_PUT } from '@/configs/api-path'
 
 export default function AbAdd() {
   const router = useRouter()
 
   const [myForm, setMyForm] = useState({
+    sid: 0,
     name: '',
     email: '',
     mobile: '',
     birthday: '',
     address: '',
   })
-
   const [myFormErrors, setMyFormErrors] = useState({
     name: '',
     email: '',
@@ -25,44 +25,25 @@ export default function AbAdd() {
 
   const onChange = (e) => {
     console.log(e.target.name, e.target.value)
+    const newForm = { ...myForm, [e.target.name]: e.target.value }
+    console.log(newForm)
+    setMyForm(newForm)
+  }
 
-    //做表單的驗證
-    // const schemaEmail = z.string().email({ message: '請填寫正確的電郵格式' })
-    // if (e.target.name === 'email') {
-    //   const result = schemaEmail.safeParse(e.target.value)
-    //   console.log(JSON.stringify(result, null, 4))
-    // }
-
-    /*
-    {
-    "success": false,
-    "error": {
-        "issues": [
-            {
-                "validation": "regex",
-                "code": "invalid_string",
-                "message": "請填寫正確的手機格式",
-                "path": [
-                    "mobile"
-                ]
-            }
-        ],
-        "name": "ZodError"
-    }
-}
-    */
+  const onSubmit = async (e) => {
+    e.preventDefault()
+    // 如果表單驗證有通過的話
 
     const schemaForm = z.object({
       name: z.string().min(2, { message: '姓名至少兩個字' }),
       email: z.string().email({ message: '請填寫正確的電郵格式' }),
       mobile: z
         .string()
-        .regex(/09\d{2}\d{3}\d{3}/, { message: '請填寫正確的手機格式' }),
+        .regex(/09\d{2}-?\d{3}-?\d{3}/, { message: '請填寫正確的手機格式' }),
     })
-    const newForm = { ...myForm, [e.target.name]: e.target.value }
 
-    const result2 = schemaForm.safeParse(newForm)
-    console.log(JSON.stringify(result2, null, 4))
+    const result2 = schemaForm.safeParse(myForm)
+    // console.log(JSON.stringify(result2, null, 4));
 
     // 重置 myFormErrors
     const newFormErrors = {
@@ -70,24 +51,24 @@ export default function AbAdd() {
       email: '',
       mobile: '',
     }
-
-    if (!result2.success && result2?.error?.issues?.length) {
-      for (let issue of result2.error.issues) {
-        newFormErrors[issue.path[0]] = issue.message
+    if (!result2.success) {
+      if (result2?.error?.issues?.length) {
+        for (let issue of result2.error.issues) {
+          newFormErrors[issue.path[0]] = issue.message
+        }
+        setMyFormErrors(newFormErrors)
       }
+      return // 表單資料沒有通過檢查就直接返回
     }
-    setMyFormErrors(newFormErrors)
-
-    console.log(newForm)
-    setMyForm(newForm)
-  }
-  const onSubmit = async (e) => {
-    e.preventDefault()
-    // 如果表單驗證有通過的話
+    // 走到這邊表示, 表單有通過驗證
     try {
-      const r = await fetch(AB_ADD_POST, {
-        method: 'POST',
-        body: JSON.stringify(myForm),
+      const newMyForm = { ...myForm }
+      delete newMyForm.sid
+      delete newMyForm.created_at
+
+      const r = await fetch(`${AB_UPDATE_PUT}/${router.query.sid}`, {
+        method: 'PUT',
+        body: JSON.stringify(newMyForm),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -95,21 +76,36 @@ export default function AbAdd() {
       const result = await r.json()
       console.log(result)
       if (result.success) {
-        router.push(`/ab-list`) //跳頁
+        // router.push(`/ab-list`) // 跳頁
+        alert('修改成功')
       } else {
+        alert('資料沒有修改')
       }
     } catch (ex) {
       console.log(ex)
     }
   }
 
+  useEffect(() => {
+    if (!router.isReady) return
+    fetch(`${AB_GET_ITEM}/${router.query.sid}`)
+      .then((r) => r.json())
+      .then((result) => {
+        if (result.success) {
+          setMyForm(result.data)
+        } else {
+          router.push('/ab-list') // 跳回列表頁
+        }
+      })
+  }, [router])
+
   return (
-    <Layout1 title="新增通訊錄" pageName="ab-add">
+    <Layout1 title="編輯通訊錄" pageName="ab-edit">
       <div className="row">
         <div className="col-6">
           <div className="card">
             <div className="card-body">
-              <h5 className="card-title">新增資料</h5>
+              <h5 className="card-title">編輯資料</h5>
               <form name="form1" onSubmit={onSubmit}>
                 <div className="mb-3">
                   <label htmlFor="name" className="form-label">
@@ -125,6 +121,7 @@ export default function AbAdd() {
                   />
                   <div className="form-text">{myFormErrors.name}</div>
                 </div>
+
                 <div className="mb-3">
                   <label htmlFor="email" className="form-label">
                     Email
@@ -139,6 +136,7 @@ export default function AbAdd() {
                   />
                   <div className="form-text">{myFormErrors.email}</div>
                 </div>
+
                 <div className="mb-3">
                   <label htmlFor="mobile" className="form-label">
                     手機
@@ -153,6 +151,7 @@ export default function AbAdd() {
                   />
                   <div className="form-text">{myFormErrors.mobile}</div>
                 </div>
+
                 <div className="mb-3">
                   <label htmlFor="birthday" className="form-label">
                     生日
@@ -167,10 +166,12 @@ export default function AbAdd() {
                   />
                   <div className="form-text"></div>
                 </div>
+
                 <div className="mb-3">
                   <label htmlFor="address" className="form-label">
                     地址
                   </label>
+
                   <textarea
                     className="form-control"
                     id="address"
@@ -182,8 +183,9 @@ export default function AbAdd() {
                   ></textarea>
                   <div className="form-text"></div>
                 </div>
+
                 <button type="submit" className="btn btn-primary">
-                  新增
+                  修改
                 </button>
               </form>
             </div>

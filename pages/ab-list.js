@@ -3,6 +3,9 @@ import { AB_LIST } from '@/configs/api-path'
 import Layout1 from '@/components/layout/default-layout/layout1'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { FaRegTrashAlt } from 'react-icons/fa'
+import { FaRegPenToSquare } from 'react-icons/fa6'
+import { AB_ITEM_DELETE } from '@/configs/api-path'
 
 export default function AbList() {
   const router = useRouter()
@@ -12,6 +15,24 @@ export default function AbList() {
     success: false,
     rows: [],
   })
+
+  const removeOne = async (sid) => {
+    console.log({ sid })
+
+    try {
+      const r = await fetch(`${AB_ITEM_DELETE}/${sid}`, {
+        method: 'DELETE',
+      })
+
+      const result = await r.json()
+      console.log(result)
+      if (result.success) {
+        // 留在原本的頁面, 但是要觸發 router 狀態變更, 讓整個頁面更新
+        // router.push(location.search)
+        router.push(location.search, undefined, { scroll: false })
+      }
+    } catch (ex) {}
+  }
 
   useEffect(() => {
     const controller = new AbortController()
@@ -72,20 +93,42 @@ export default function AbList() {
           <table className="table table-bordered table-striped">
             <thead>
               <tr>
+                <th>
+                  <FaRegTrashAlt />
+                </th>
                 <th>#</th>
                 <th>姓名</th>
                 <th>電郵</th>
                 <th>手機</th>
+                <th>
+                  <FaRegPenToSquare />
+                </th>
               </tr>
             </thead>
             <tbody>
               {data.rows.map((r, i) => {
                 return (
                   <tr key={r.sid}>
+                    <td>
+                      <a
+                        href="#/"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          removeOne(r.sid)
+                        }}
+                      >
+                        <FaRegTrashAlt />
+                      </a>
+                    </td>
                     <td>{r.sid}</td>
                     <td>{r.name}</td>
                     <td>{r.email}</td>
                     <td>{r.mobile}</td>
+                    <td>
+                      <Link href={`/ab-edit/${r.sid}`}>
+                        <FaRegPenToSquare />
+                      </Link>
+                    </td>
                   </tr>
                 )
               })}
