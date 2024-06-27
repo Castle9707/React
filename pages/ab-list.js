@@ -6,9 +6,11 @@ import { useRouter } from 'next/router'
 import { FaRegTrashAlt } from 'react-icons/fa'
 import { FaRegPenToSquare } from 'react-icons/fa6'
 import { AB_ITEM_DELETE } from '@/configs/api-path'
+import { useAuth } from '@/context/auth-context'
 
 export default function AbList() {
   const router = useRouter()
+  const { auth, getAuthHeader } = useAuth()
   // const [loading, setLoading] = useState(false);
   // const [loadingError, setLoadingError] = useState('');
   const [data, setData] = useState({
@@ -19,9 +21,16 @@ export default function AbList() {
   const removeOne = async (sid) => {
     console.log({ sid })
 
+    if (!auth.id) {
+      alert('請登入管理者')
+    }
+
     try {
       const r = await fetch(`${AB_ITEM_DELETE}/${sid}`, {
         method: 'DELETE',
+        headers: {
+          ...getAuthHeader(),
+        },
       })
 
       const result = await r.json()

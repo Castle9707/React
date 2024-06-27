@@ -1,5 +1,7 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useAuth } from '@/context/auth-context'
+import { useRouter } from 'next/router'
 
 const myStyle = {
   borderRadius: '6px',
@@ -9,6 +11,14 @@ const myStyle = {
 }
 
 export default function Navbar({ pageName = '' }) {
+  const [thisPage, setThisPage] = useState('')
+  const { auth, logout } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    setThisPage(location.href)
+  }, [router])
+
   return (
     <div className="container">
       <nav className="navbar navbar-expand-lg bg-body-tertiary">
@@ -61,6 +71,39 @@ export default function Navbar({ pageName = '' }) {
                   購物車 <span className="badge text-bg-success">3</span>
                 </Link>
               </li>
+              <li className="nav-item">
+                <Link
+                  className="nav-link"
+                  style={pageName === 'quick' ? myStyle : null}
+                  href="/quick"
+                >
+                  快速登入
+                </Link>
+              </li>
+            </ul>
+            <ul className="navbar-nav mb-2 mb-lg-0">
+              {auth.id && auth.nickname ? (
+                <>
+                  <li className="nav-item">
+                    <a className="nav-link">{auth.nickname}</a>
+                  </li>
+                  <li className="nav-item">
+                    <a className="nav-link" href="#/" onClick={() => logout()}>
+                      登出
+                    </a>
+                  </li>
+                </>
+              ) : (
+                <li className="nav-item">
+                  <Link
+                    className="nav-link"
+                    style={pageName === 'login-jwt' ? myStyle : null}
+                    href={`/login-jwt?u=${thisPage}`}
+                  >
+                    登入
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
         </div>
