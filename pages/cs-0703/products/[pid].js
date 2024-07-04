@@ -24,7 +24,7 @@ export default function Detail() {
 
   // 與伺服器作fetch獲得資料(建議寫在useEffect上面與外面比較容易維護管理)
   const getProduct = async (pid) => {
-    const url = 'https://localhost:3005/api/my-products/' + pid
+    const url = 'http://localhost:3005/api/my-products/' + pid
 
     // 使用try-catch陳述式，讓和伺服器連線程式作錯誤處理
     try {
@@ -70,6 +70,7 @@ export default function Detail() {
     <>
       <h1>商品詳細頁</h1>
       <hr />
+      {/* 用isLoading狀態進行條件式渲染，決定要呈現內容還是載入指示動畫 */}
       {isLoading ? (
        <Loader/>
       ) : (
@@ -78,7 +79,7 @@ export default function Detail() {
         <p>ID: {product.id}</p>
         <p>價格: {product.price}</p>
         </>
-       )}
+     )}
     </>
   )
 }

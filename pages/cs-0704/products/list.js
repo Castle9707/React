@@ -24,6 +24,15 @@ export default function List() {
   const [pageCount, setPageCount] = useState(0) // 總頁數
   const [products, setProducts] = useState([]) // 商品資料陣列
 
+  // 查詢條件用(這裡用的初始值都與伺服器的預設值一致)
+  const [nameLike, setNameLike] = useState('')
+  const [brands, setBrands] = useState([]) // 字串陣列
+  const [priceGte, setPriceGte] = useState(0)
+  const [priceLte, setPriceLte] = useState(15000)
+
+  // 品牌選項陣列
+  const brandOptions = ['Apple', 'Google', 'Samsung', '小米']
+
   // 排序用
   const [orderby, setOrderby] = useState({ sort: 'id', order: 'asc' })
 
@@ -70,6 +79,41 @@ export default function List() {
     }
   }
 
+  // 品牌複選時使用(使用字串陣列狀態)
+  const handleBrandChecked = (e) => {
+    // 宣告方便使用的tv名稱，取得觸發事件物件的目標值
+    const tv = e.target.value
+    // 判斷是否有在陣列中
+    if (brands.includes(tv)) {
+      // 如果有===>移出陣列
+      const nextBrands = brands.filter((v) => v !== tv)
+      setBrands(nextBrands)
+    } else {
+      // 否則===>加入陣列
+      const nextBrands = [...brands, tv]
+      setBrands(nextBrands)
+    }
+  }
+
+  // 按下搜尋按鈕
+  const handleSearch = () => {
+    // 每次搜尋條件後，因為頁數和筆數可能不同，所以要導向第1頁
+    setPage(1)
+
+    const params = {
+      page: 1, // 每次搜尋條件後，因為頁數和筆數可能不同，所以要導向第1頁，向伺服器要第1頁的資料
+      perpage,
+      sort: orderby.sort,
+      order: orderby.order,
+      name_like: nameLike,
+      brands: brands.join(','),
+      price_gte: priceGte,
+      price_lte: priceLte,
+    }
+
+    getProducts(params)
+  }
+
   // 樣式3: didMount+didUpdate
   useEffect(() => {
     const params = {
@@ -77,11 +121,16 @@ export default function List() {
       perpage,
       sort: orderby.sort,
       order: orderby.order,
+      name_like: nameLike,
+      brands: brands.join(','),
+      price_gte: priceGte,
+      price_lte: priceLte,
     }
 
-    // 呼叫與伺服器作fetch獲得資料
     getProducts(params)
+    // eslint-disable-next-line
   }, [page, perpage, orderby])
+  // ^^^^^^^^^^^^^^^^^^^^^^^^ 這裡只監聽page, perpage, orderby更動
 
   return (
     <>
@@ -106,6 +155,59 @@ export default function List() {
         下一頁
       </button>
       目前頁面 {page} / 總頁數 {pageCount} / 總筆數: {total}
+      <div>
+        名稱:
+        <input
+          type="text"
+          value={nameLike}
+          onChange={(e) => {
+            setNameLike(e.target.value)
+          }}
+        />
+      </div>
+      <hr />
+      <div>
+        品牌:
+        {brandOptions.map((v, i) => {
+          return (
+            <label
+              // 當初次render後不會再改動，即沒有新增、刪除、更動時，可以用索引當key
+              key={i}
+            >
+              <input
+                type="checkbox"
+                value={v}
+                checked={brands.includes(v)}
+                onChange={handleBrandChecked}
+              />
+              {v}
+            </label>
+          )
+        })}
+      </div>
+      <div>
+        價格大於:
+        <input
+          type="number"
+          value={priceGte}
+          onChange={(e) => {
+            setPriceGte(Number(e.target.value))
+          }}
+        />
+        小於:
+        <input
+          type="number"
+          value={priceLte}
+          onChange={(e) => {
+            setPriceLte(Number(e.target.value))
+          }}
+        />
+      </div>
+      <hr />
+      <div>
+        <button onClick={handleSearch}>搜尋</button>
+      </div>
+      <hr />
       <div>
         <label>
           排序
