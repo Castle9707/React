@@ -24,21 +24,21 @@ export default function Detail() {
 
   // 與伺服器作fetch獲得資料(建議寫在useEffect上面與外面比較容易維護管理)
   const getProduct = async (pid) => {
-    const url = 'https://localhost:3005/api/my-products/' + pid
+    const url = 'http://localhost:3005/api/my-products/' + pid
 
     // 使用try-catch陳述式，讓和伺服器連線程式作錯誤處理
     try {
       const res = await fetch(url)
-       // product資料在data.data.product
+      // product資料在data.data.product
       const resData = await res.json()
 
-      if(resData.status === 'success'){
+      if (resData.status === 'success') {
         // 檢查是否為物件資料類型(基本保護)
         if (resData.data.product.id) {
-         // 設定到狀態中 ===> 進入update階段，觸發重新渲染(re-render)
+          // 設定到狀態中 ===> 進入update階段，觸發重新渲染(re-render)
           setProduct(resData.data.product)
 
-         // 關閉載入動畫，撥放1.5秒
+          // 關閉載入動畫，撥放1.5秒
           setTimeout(() => {
             setIsLoading(false)
           }, 1500)
@@ -70,15 +70,16 @@ export default function Detail() {
     <>
       <h1>商品詳細頁</h1>
       <hr />
+      {/* 用isLoading狀態進行條件式渲染，決定要呈現內容還是載入指示動畫 */}
       {isLoading ? (
-       <Loader/>
+        <Loader />
       ) : (
         <>
-        <h2>{product.name}</h2>
-        <p>ID: {product.id}</p>
-        <p>價格: {product.price}</p>
+          <h2>{product.name}</h2>
+          <p>ID: {product.id}</p>
+          <p>價格: {product.price}</p>
         </>
-       )}
+      )}
     </>
   )
 }
